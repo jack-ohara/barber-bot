@@ -1,0 +1,19 @@
+{
+  "name": "barber-booking",
+  "version": "1.0.0",
+  "description": "Simple package for booking appointments at my barbers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/jack-ohara/barber-booking.git"
+  },
+  "author": "Jack O'Hara",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jack-ohara/barber-booking/issues"
+  },
+  "homepage": "https://github.com/jack-ohara/barber-booking#readme"
+}
