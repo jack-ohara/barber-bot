@@ -1,5 +1,6 @@
 export default function addTimeToDate(existingDate: Date, timeString: string): Date {
     const newDate = new Date(existingDate);
+    
 
     const isPm = timeString.toLowerCase().includes('pm');
 
@@ -8,7 +9,7 @@ export default function addTimeToDate(existingDate: Date, timeString: string): D
 
     const [hours, mins] = timeString.split(':').map(x => parseInt(x));
 
-    newDate.setHours(isPm ? hours + 12 : hours, mins);
+    newDate.setHours(isPm && hours !== 12 ? hours + 12 : hours, mins);
 
     return newDate;
 }

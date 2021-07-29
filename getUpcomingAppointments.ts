@@ -40,8 +40,9 @@ function parseAppointments(htmlAppointments: HTMLElement[]): Appointment[] {
         date = addTimeToDate(date, timeString);  
         
         return {
-            barber: barber,
-            date: date
+            provider: {name: barber, id: NaN},
+            date: date,
+            serviceID: NaN
         };
     });
 }

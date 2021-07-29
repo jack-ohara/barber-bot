@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { Appointment } from "./types";
+import { Appointment, Provider } from "./types";
 import addTimeToDate from "./utils/timeParser";
 
 interface Service {
@@ -16,11 +16,6 @@ interface GetProvidersResponse {
             status: 'available' | 'booked';
         }
     ];
-}
-
-interface Provider {
-    id: number;
-    name: string;
 }
 
 interface GetAvailabilityResponse {
@@ -100,14 +95,18 @@ async function getAppointmentsOnDay(authCookie: string, targetDate: Date, servic
 
     const availableTimes = joshAvailability.startTimes[josh.provider.id].startTime;
 
-    return Object.keys(availableTimes).map(a => {
-        const timeSlot = availableTimes[a];
+    return Object.keys(availableTimes).map(e => {
+        const availableTime = availableTimes[e];
+        let appDate = new Date(availableTime.date);
 
-        let date = new Date(targetDate);
-        date = addTimeToDate(date, timeSlot.time);
+        appDate = addTimeToDate(appDate, availableTimes[e].time)
 
-        return {barber: josh.provider.name, date: date};
-    })
+        return {
+            provider: josh.provider,
+            date: appDate,
+            serviceID: serviceID
+        }
+    });
 }
 
 export default async function getAvailableAppointments(authCookie: string, targetDate: Date): Promise<Appointment[]> {
@@ -115,5 +114,5 @@ export default async function getAvailableAppointments(authCookie: string, targe
 
     const haircutService = services.find(s => s.service.name.toLowerCase() === 'haircut');
 
-    return getAppointmentsOnDay(authCookie, targetDate, haircutService.service.id);
+    return await getAppointmentsOnDay(authCookie, targetDate, haircutService.service.id);
 }
