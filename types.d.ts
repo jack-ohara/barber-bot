@@ -8,3 +8,8 @@ export interface Appointment {
     serviceID: number;
     date: Date;
 }
+
+export interface AuthInfo {
+    csrf: string;
+    authCookie: string;
+}

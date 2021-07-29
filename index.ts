@@ -1,18 +1,12 @@
 import dotenv from 'dotenv';
+import bookAppointment from './bookAppointment';
 import getAvailableAppointments from './getAvailableAppointments';
 import { getUpcomingAppointments } from './getUpcomingAppointments';
 import login from './login';
 import { Appointment } from './types';
+import formatDatePretty from './utils/dateTimeFormatter';
 
-function printAppointments(appointments: Appointment[]) {
-    console.log("Appointments");
-    console.log("----------------------------------------");
-    appointments.forEach(a => {
-        console.log(`${a.provider.name.padStart(15)} | ${a.date.toLocaleString()}`);
-    });
-}
-
-async function getAppointments(dates: Date[], authCookie: string) {
+async function getAppointments(dates: Date[], authCookie: string): Promise<Appointment[]> {
     const requests = dates.map(d => getAvailableAppointments(authCookie, d));
 
     const results = await Promise.all(requests);
@@ -27,8 +21,10 @@ async function getAppointments(dates: Date[], authCookie: string) {
     console.log(`Available appointments for ${allAppointments[0].provider.name}`);
     console.log('--------------------------------------');
     allAppointments.forEach(app => {
-        console.log(`${app.date.toLocaleDateString('en-GB').padStart(10)}, ${app.date.getHours().toString().padStart(2, '0')}:${app.date.getMinutes().toString().padEnd(2, '0')}`);
-    })
+        console.log(formatDatePretty(app.date));
+    });
+
+    return allAppointments;
 }
 
 function getPossibleDatesForNextAppointment(latestBookedAppointment: Appointment) {
@@ -40,9 +36,7 @@ function getPossibleDatesForNextAppointment(latestBookedAppointment: Appointment
     ]
 }
 
-async function getAvailabilityForNextAppointment() {
-    const authCookie = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
-
+async function getAvailabilityForNextAppointment(authCookie: string): Promise<Appointment[]> {
     const appointments = await getUpcomingAppointments(authCookie);
 
     const latestBookedAppointment = appointments.find(app => app.date.getTime() === Math.max.apply(null, appointments.map(e => e.date)));
@@ -53,7 +47,19 @@ async function getAvailabilityForNextAppointment() {
 
     console.info(`Checking these dates for next appointment: ${possibleDates.map(d => d.toLocaleDateString('en-GB')).join(', ')}`)
 
-    await getAppointments(possibleDates, authCookie);
+    return await getAppointments(possibleDates, authCookie);
+}
+
+async function bookNextAppointment() {
+    const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
+
+    const availableAppointments = await getAvailabilityForNextAppointment(auth.authCookie);
+
+    const appointmentToBook = availableAppointments[0];
+
+    console.log(`\nBooking an appointment with ${appointmentToBook.provider.name} for ${formatDatePretty(appointmentToBook.date)}\n`);
+
+    await bookAppointment(auth.authCookie, appointmentToBook);
 }
 
 dotenv.config();
@@ -61,4 +67,4 @@ dotenv.config();
 // getUpcomingAppointmentList();
 // getSaturdayAppointments();
 
-getAvailabilityForNextAppointment();
+bookNextAppointment();

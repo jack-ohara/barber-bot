@@ -1,10 +1,6 @@
 import parse from "node-html-parser";
 import fetch from 'node-fetch';
-
-interface AuthInfo {
-    csrf: string;
-    authCookie: string;
-}
+import { AuthInfo } from "./types";
 
 async function getAuth(): Promise<AuthInfo> {
     const response = await fetch("https://northwestbarberco.resurva.com/login", {
@@ -24,7 +20,7 @@ async function getAuth(): Promise<AuthInfo> {
     return {authCookie: authCookieKeyValue, csrf};
 }
 
-export default async function login(emailAddress: string, password: string): Promise<string> {
+export default async function login(emailAddress: string, password: string): Promise<AuthInfo> {
     const auth = await getAuth();
 
     await fetch("https://northwestbarberco.resurva.com/login", {
@@ -39,5 +35,5 @@ export default async function login(emailAddress: string, password: string): Pro
         "method": "POST",
     });
 
-    return auth.authCookie;
+    return auth;
 }
