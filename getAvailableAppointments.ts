@@ -93,6 +93,10 @@ async function getAppointmentsOnDay(authCookie: string, targetDate: Date, servic
 
     const joshAvailability = await getProviderAvailability(authCookie, targetDate, serviceID, josh.provider);
 
+    if (Object.keys(joshAvailability.startTimes).length === 0) {
+        return [];
+    }
+
     const availableTimes = joshAvailability.startTimes[josh.provider.id].startTime;
 
     return Object.keys(availableTimes).map(e => {

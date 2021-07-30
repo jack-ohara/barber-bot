@@ -16,13 +16,17 @@ async function getAppointments(dates: Date[], authCookie: string): Promise<Appoi
     results.slice(1).forEach(r => allAppointments = allAppointments.concat(r));
 
     allAppointments = allAppointments.sort((a, b) => a.date.getTime() - b.date.getTime())
-    
-    console.log('--------------------------------------');
-    console.log(`Available appointments for ${allAppointments[0].provider.name}`);
-    console.log('--------------------------------------');
-    allAppointments.forEach(app => {
-        console.log(formatDatePretty(app.date));
-    });
+
+    if (allAppointments.length === 0) {
+        console.warn(`No appointments available for ${dates.map(d => d.toLocaleDateString('en-GB')).join(', ')}`)
+    } else {
+        console.log('--------------------------------------');
+        console.log(`Available appointments for ${allAppointments[0].provider.name}`);
+        console.log('--------------------------------------');
+        allAppointments.forEach(app => {
+            console.log(formatDatePretty(app.date));
+        });
+    }
 
     return allAppointments;
 }
@@ -55,11 +59,19 @@ async function bookNextAppointment() {
 
     const availableAppointments = await getAvailabilityForNextAppointment(auth.authCookie);
 
-    const appointmentToBook = availableAppointments[0];
+    if (availableAppointments.length) {
+        const appointmentToBook = availableAppointments[0];
 
-    console.log(`\nBooking an appointment with ${appointmentToBook.provider.name} for ${formatDatePretty(appointmentToBook.date)}\n`);
+        console.log(`\nBooking an appointment with ${appointmentToBook.provider.name} for ${formatDatePretty(appointmentToBook.date)}\n`);
 
-    await bookAppointment(auth.authCookie, appointmentToBook);
+        await bookAppointment(auth.authCookie, appointmentToBook);
+    }
+}
+
+async function getAppointmentsForDay(day: Date) {
+    const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
+
+    await getAppointments([day], auth.authCookie);
 }
 
 dotenv.config();
@@ -67,4 +79,5 @@ dotenv.config();
 // getUpcomingAppointmentList();
 // getSaturdayAppointments();
 
-bookNextAppointment();
+// bookNextAppointment();
+getAppointmentsForDay(new Date(process.argv[2]));
