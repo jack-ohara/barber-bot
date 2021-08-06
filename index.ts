@@ -1,83 +1,125 @@
-import dotenv from 'dotenv';
-import bookAppointment from './bookAppointment';
-import getAvailableAppointments from './getAvailableAppointments';
-import { getUpcomingAppointments } from './getUpcomingAppointments';
-import login from './login';
-import { Appointment } from './types';
-import formatDatePretty from './utils/dateTimeFormatter';
+import dotenv from "dotenv";
+import bookAppointment from "./bookAppointment";
+import getAvailableAppointments from "./getAvailableAppointments";
+import { getUpcomingAppointments } from "./getUpcomingAppointments";
+import login from "./login";
+import { Appointment, AuthInfo } from "./types";
+import express from "express";
 
-async function getAppointments(dates: Date[], authCookie: string): Promise<Appointment[]> {
-    const requests = dates.map(d => getAvailableAppointments(authCookie, d));
+const app = express();
+app.use(express.json());
+const port = 3000;
 
-    const results = await Promise.all(requests);
+async function getAppointments(
+  dates: Date[],
+  authCookie: string
+): Promise<Appointment[]> {
+  const requests = dates.map((d) => getAvailableAppointments(authCookie, d));
 
-    let allAppointments = results[0];
+  const results = await Promise.all(requests);
 
-    results.slice(1).forEach(r => allAppointments = allAppointments.concat(r));
+  let allAppointments = results[0];
 
-    allAppointments = allAppointments.sort((a, b) => a.date.getTime() - b.date.getTime())
+  results
+    .slice(1)
+    .forEach((r) => (allAppointments = allAppointments.concat(r)));
 
-    if (allAppointments.length === 0) {
-        console.warn(`No appointments available for ${dates.map(d => d.toLocaleDateString('en-GB')).join(', ')}`)
-    } else {
-        console.log('--------------------------------------');
-        console.log(`Available appointments for ${allAppointments[0].provider.name}`);
-        console.log('--------------------------------------');
-        allAppointments.forEach(app => {
-            console.log(formatDatePretty(app.date));
-        });
-    }
+  allAppointments = allAppointments.sort(
+    (a, b) => a.date.getTime() - b.date.getTime()
+  );
 
-    return allAppointments;
+  return allAppointments;
 }
 
-function getPossibleDatesForNextAppointment(latestBookedAppointment: Appointment) {
-    return [
-        new Date(latestBookedAppointment.date.getTime() + (28 * 24 * 60 * 60 * 1000)),
-        new Date(latestBookedAppointment.date.getTime() + (35 * 24 * 60 * 60 * 1000)),
-        new Date(latestBookedAppointment.date.getTime() + (42 * 24 * 60 * 60 * 1000)),
-        new Date(latestBookedAppointment.date.getTime() + (49 * 24 * 60 * 60 * 1000))
-    ]
+function getPossibleDatesForNextAppointment(
+  latestBookedAppointment: Appointment
+) {
+  return [
+    new Date(latestBookedAppointment.date.getTime() + 28 * 24 * 60 * 60 * 1000),
+    new Date(latestBookedAppointment.date.getTime() + 35 * 24 * 60 * 60 * 1000),
+    new Date(latestBookedAppointment.date.getTime() + 42 * 24 * 60 * 60 * 1000),
+    new Date(latestBookedAppointment.date.getTime() + 49 * 24 * 60 * 60 * 1000),
+  ];
 }
 
-async function getAvailabilityForNextAppointment(authCookie: string): Promise<Appointment[]> {
-    const appointments = await getUpcomingAppointments(authCookie);
+async function getAvailabilityForNextAppointment(
+  authCookie: string
+): Promise<Appointment[]> {
+  const appointments = await getUpcomingAppointments(authCookie);
 
-    const latestBookedAppointment = appointments.find(app => app.date.getTime() === Math.max.apply(null, appointments.map(e => e.date)));
+  const latestBookedAppointment = appointments.find(
+    (app) =>
+      app.date.getTime() ===
+      Math.max.apply(
+        null,
+        appointments.map((e) => e.date)
+      )
+  );
 
-    console.info(`Latest appointment is scheduled for ${latestBookedAppointment.date}\n\n`);
+  const possibleDates = getPossibleDatesForNextAppointment(
+    latestBookedAppointment
+  );
 
-    const possibleDates = getPossibleDatesForNextAppointment(latestBookedAppointment);
-
-    console.info(`Checking these dates for next appointment: ${possibleDates.map(d => d.toLocaleDateString('en-GB')).join(', ')}`)
-
-    return await getAppointments(possibleDates, authCookie);
-}
-
-async function bookNextAppointment() {
-    const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
-
-    const availableAppointments = await getAvailabilityForNextAppointment(auth.authCookie);
-
-    if (availableAppointments.length) {
-        const appointmentToBook = availableAppointments[0];
-
-        console.log(`\nBooking an appointment with ${appointmentToBook.provider.name} for ${formatDatePretty(appointmentToBook.date)}\n`);
-
-        await bookAppointment(auth.authCookie, appointmentToBook);
-    }
+  return await getAppointments(possibleDates, authCookie);
 }
 
 async function getAppointmentsForDay(day: Date) {
-    const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
+  const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
 
-    await getAppointments([day], auth.authCookie);
+  await getAppointments([day], auth.authCookie);
 }
 
 dotenv.config();
 
-// getUpcomingAppointmentList();
-// getSaturdayAppointments();
+type AppointmentType = "upcoming" | "available";
 
-// bookNextAppointment();
-getAppointmentsForDay(new Date(process.argv[2]));
+app.get("/appointments", async (req, res) => {
+  const appointmentType = (req.query.type || "upcoming") as AppointmentType;
+
+  let auth: AuthInfo;
+  let appointments: Appointment[];
+
+  switch (appointmentType) {
+    case "upcoming":
+      auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
+      appointments = await getUpcomingAppointments(auth.authCookie);
+      break;
+
+    case "available":
+      auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
+      appointments = await getAvailabilityForNextAppointment(auth.authCookie);
+      break;
+
+    default:
+      res
+        .status(400)
+        .send(`${appointmentType} is not a valid appointment type`);
+      return;
+  }
+
+  res.json(appointments).end();
+});
+
+app.post("/appointments", async (req, res) => {
+  const appointmentToBook = req.body as Appointment;
+
+  if (
+    !appointmentToBook?.provider?.id ||
+    !appointmentToBook.provider.name ||
+    !appointmentToBook.date ||
+    !appointmentToBook.serviceID
+  ) {
+    res.status(400).send("invalid appointment");
+    return;
+  }
+
+  const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
+
+  await bookAppointment(auth.authCookie, appointmentToBook);
+
+  res.end();
+});
+
+app.listen(port, () => {
+  console.log(`App listening at http://localhost:${port}`);
+});
