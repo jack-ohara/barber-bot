@@ -2,7 +2,6 @@ import fetch from "node-fetch";
 import { HTMLElement, parse } from "node-html-parser";
 import { Appointment } from "./types";
 import addTimeToDate from "./utils/timeParser";
-import fs from "fs";
 
 export async function getUpcomingAppointments(authCookieKeyValue: string) {
   const response = await fetch(
@@ -27,8 +26,6 @@ export async function getUpcomingAppointments(authCookieKeyValue: string) {
   }
 
   const appointmentsPage = await response.text();
-
-  fs.writeFile("getUpcoming.html", appointmentsPage, () => {});
 
   const root = parse(appointmentsPage);
 

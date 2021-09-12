@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
-import bookAppointment from "./bookAppointment";
-import getAvailableAppointments from "./getAvailableAppointments";
-import { getUpcomingAppointments } from "./getUpcomingAppointments";
-import login from "./login";
-import { Appointment, AuthInfo } from "./types";
+import bookAppointment from "./barber-bot-src/bookAppointment";
+import getAvailableAppointments from "./barber-bot-src/getAvailableAppointments";
+import { getUpcomingAppointments } from "./barber-bot-src/getUpcomingAppointments";
+import login from "./barber-bot-src/login";
+import { Appointment, AuthInfo } from "./barber-bot-src/types";
 import express from "express";
 
 const app = express();

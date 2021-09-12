@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "description": "Simple package for managing appointments at my barbers",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "tsc && node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prestart": "npm run build",
+    "start": "func start"
   },
   "repository": {
     "type": "git",
@@ -18,15 +22,16 @@
   },
   "homepage": "https://github.com/jack-ohara/barber-bot#readme",
   "devDependencies": {
+    "@azure/functions": "^1.2.3",
     "@types/express": "^4.17.12",
-    "@types/node-fetch": "^2.5.12",
+    "@types/node-fetch": "^3.0.3",
     "dotenv": "^10.0.0",
     "typescript": "^4.3.5"
   },
   "dependencies": {
     "express": "^4.17.1",
     "fs": "^0.0.1-security",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.0.0",
     "node-html-parser": "^4.1.2"
   }
 }
