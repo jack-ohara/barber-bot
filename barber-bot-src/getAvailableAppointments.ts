@@ -1,4 +1,3 @@
-import { response } from "express";
 import fetch from "node-fetch";
 import { Appointment, Provider } from "./types";
 import addTimeToDate from "./utils/timeParser";
@@ -51,7 +50,7 @@ async function getServicesOffered(authCookie: string): Promise<Service[]> {
     }
   );
 
-  const jsonResult = await response.json();
+  const jsonResult: any = await response.json();
 
   return jsonResult.services;
 }
@@ -75,7 +74,7 @@ async function getProvidersOnDay(
     }
   );
 
-  const providers: GetProvidersResponse = await response.json();
+  const providers: any = await response.json();
 
   return providers;
 }
@@ -104,7 +103,7 @@ async function getProviderAvailability(
     }
   );
 
-  const availability: GetAvailabilityResponse = await response.json();
+  const availability: any = await response.json();
 
   return availability;
 }
