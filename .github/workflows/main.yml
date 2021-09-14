@@ -1,4 +1,4 @@
-name: Deploy to CF worker
+name: Deploy to Azure Function
 
 # Controls when the workflow will run
 on:
