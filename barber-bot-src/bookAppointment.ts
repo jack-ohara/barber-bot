@@ -2,18 +2,16 @@ import { Appointment } from "./types";
 import fetch from "node-fetch";
 import parse from "node-html-parser";
 import formatAppointment from "./utils/appointmentToString";
+import axios from "axios";
 
 async function getCsrf(authCookie: string): Promise<string> {
-  const response = await fetch("https://northwestbarberco.resurva.com/book", {
-    "headers": {
-      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+  const response = await axios.get("https://northwestbarberco.resurva.com/book", {headers: {
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
       "accept-language": "en-GB,en;q=0.9,en-US;q=0.8",
       "cookie": authCookie
-    },
-    "method": "GET",
-  });
+  }});
 
-  const root = parse(await response.text());
+  const root = parse(await response.data);
 
   return root.querySelector('#csrf').attributes["value"];
 }
