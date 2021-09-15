@@ -115,11 +115,11 @@ async function getAppointmentsOnDay(
 ): Promise<Appointment[]> {
   const providers = await getProvidersOnDay(authCookie, targetDate, serviceID);
 
-  const josh = providers.providers.find(
-    (p) => p.provider.name.toLowerCase() === "josh clarke"
+  const provider = providers.providers.find(
+    (p) => p.provider.name.toLowerCase() === process.env.BARBER_NAME
   );
 
-  if (josh.status === "booked") {
+  if (provider.status === "booked") {
     return [];
   }
 
@@ -127,7 +127,7 @@ async function getAppointmentsOnDay(
     authCookie,
     targetDate,
     serviceID,
-    josh.provider
+    provider.provider
   );
 
   if (Object.keys(joshAvailability.startTimes).length === 0) {
@@ -135,7 +135,7 @@ async function getAppointmentsOnDay(
   }
 
   const availableTimes =
-    joshAvailability.startTimes[josh.provider.id].startTime;
+    joshAvailability.startTimes[provider.provider.id].startTime;
 
   return Object.keys(availableTimes).map((e) => {
     const availableTime = availableTimes[e];
@@ -144,7 +144,7 @@ async function getAppointmentsOnDay(
     appDate = addTimeToDate(appDate, availableTimes[e].time);
 
     return {
-      provider: josh.provider,
+      provider: provider.provider,
       date: appDate,
       serviceID: serviceID,
     };
