@@ -5,8 +5,6 @@ import { getUpcomingAppointments } from "../barber-bot-src/getUpcomingAppointmen
 import login from "../barber-bot-src/login";
 import { Appointment } from "../barber-bot-src/types";
 
-const numberOfAppointmentsToHaveBooked = 4;
-
 async function getAppointments(
   dates: Date[],
   authCookie: string
@@ -63,28 +61,37 @@ const timerTrigger: AzureFunction = async function (
   context: Context,
   myTimer: any
 ): Promise<void> {
-  context.log("Starting barber-bot ✂...")
+  context.log("Starting barber-bot ✂...");
 
   const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
 
   const upcomingAppointments = await getUpcomingAppointments(auth.authCookie);
 
-  context.log(`${upcomingAppointments.length} upcoming appointment${upcomingAppointments.length != 1 ? "s" : ""} booked`)
+  context.log(
+    `${upcomingAppointments.length} upcoming appointment${
+      upcomingAppointments.length != 1 ? "s" : ""
+    } booked`
+  );
 
-  if (upcomingAppointments.length === numberOfAppointmentsToHaveBooked){
-    context.log("No appointments to book... goodbye")
+  const minNumberOfBookedAppointments = Number(
+    process.env.MIN_NUMBER_OF_BOOKED_APPOINTMENTS
+  );
+
+  if (upcomingAppointments.length === minNumberOfBookedAppointments) {
+    context.log("No appointments to book... goodbye");
     return;
   }
 
   const nextAppointmentAvailability = await getAvailabilityForNextAppointment(
-    auth.authCookie, upcomingAppointments
+    auth.authCookie,
+    upcomingAppointments
   );
 
   if (nextAppointmentAvailability.length === 0) {
-    context.log("Couldn't find any available appointments to book :(")
+    context.log("Couldn't find any available appointments to book :(");
     return;
   }
-  
+
   context.log(
     `Found availability for next appointment: ${JSON.stringify(
       nextAppointmentAvailability

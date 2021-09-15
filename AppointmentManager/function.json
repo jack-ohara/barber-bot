@@ -1,0 +1,11 @@
+{
+    "bindings": [
+        {
+            "name": "myTimer",
+            "type": "timerTrigger",
+            "direction": "in",
+            "schedule": "0 0 5 31 2 *"
+        }
+    ],
+    "scriptFile": "../dist/AppointmentManager/index.js"
+}
