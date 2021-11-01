@@ -1,9 +1,10 @@
+import { Context } from "@azure/functions";
 import fetch from "node-fetch";
 import { parse } from "node-html-parser";
 import { addAppointmentCalendarEvent, appointmentHasCalendarEvent } from "./google-calendar";
 import parseAppointments from "./utils/existingBookingsParser";
 
-export async function getUpcomingAppointments(authCookieKeyValue: string) {
+export async function getUpcomingAppointments(authCookieKeyValue: string, logger: Context) {
   const response = await fetch(
     "https://northwestbarberco.resurva.com/appointments",
     {
@@ -34,7 +35,7 @@ export async function getUpcomingAppointments(authCookieKeyValue: string) {
   );
 
   await Promise.all(appointments.map(async appt => {
-    if (!await appointmentHasCalendarEvent(appt)) {
+    if (!await appointmentHasCalendarEvent(appt, logger)) {
       await addAppointmentCalendarEvent(appt)
     }
   }));

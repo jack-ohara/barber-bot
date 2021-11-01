@@ -65,7 +65,7 @@ const timerTrigger: AzureFunction = async function (
 
   const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
 
-  const upcomingAppointments = await getUpcomingAppointments(auth.authCookie);
+  const upcomingAppointments = await getUpcomingAppointments(auth.authCookie, context);
 
   context.log(
     `${upcomingAppointments.length} upcoming appointment${

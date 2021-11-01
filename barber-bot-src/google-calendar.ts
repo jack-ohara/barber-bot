@@ -1,3 +1,4 @@
+import { Context } from "@azure/functions";
 import { google } from "googleapis";
 import { Appointment } from "./types";
 import formatDatePretty from "./utils/dateTimeFormatter";
@@ -31,21 +32,21 @@ export async function addAppointmentCalendarEvent(appointment: Appointment): Pro
     });
 }
 
-export async function appointmentHasCalendarEvent(appointment: Appointment): Promise<boolean> {
-    console.log("about to check if there is a calendar event...")
+export async function appointmentHasCalendarEvent(appointment: Appointment, logger: Context): Promise<boolean> {
+    logger.log("about to check if there is a calendar event...")
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
         process.env.GOOGLE_REDIRECT_URL
     );
 
-    console.log("setting the refresh token")
+    logger.log("setting the refresh token")
 
     oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
-    console.log("listing calendar events")
+    logger.log("listing calendar events")
 
     const eventsData = await calendar.events.list({
         calendarId: 'primary',
@@ -56,7 +57,7 @@ export async function appointmentHasCalendarEvent(appointment: Appointment): Pro
         orderBy: 'startTime',
     });
 
-    console.log(JSON.stringify(eventsData));
+    logger.log(JSON.stringify(eventsData));
 
     const events = eventsData?.data.items;
 
