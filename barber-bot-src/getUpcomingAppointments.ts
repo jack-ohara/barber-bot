@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 import { parse } from "node-html-parser";
+import { addAppointmentCalendarEvent, appointmentHasCalendarEvent } from "./google-calendar";
 import parseAppointments from "./utils/existingBookingsParser";
 
 export async function getUpcomingAppointments(authCookieKeyValue: string) {
@@ -31,6 +32,12 @@ export async function getUpcomingAppointments(authCookieKeyValue: string) {
   const appointments = parseAppointments(
     root.querySelectorAll("#upcomingBookings ul li")
   );
+
+  await Promise.all(appointments.map(async appt => {
+    if (!await appointmentHasCalendarEvent(appt)) {
+      await addAppointmentCalendarEvent(appt)
+    }
+  }));
 
   return appointments;
 }
