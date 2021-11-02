@@ -1,5 +1,6 @@
 import { Context } from "@azure/functions";
-import { google } from "googleapis";
+import { GaxiosResponse } from "gaxios";
+import { calendar_v3, google } from "googleapis";
 import { Appointment } from "./types";
 import formatDatePretty from "./utils/dateTimeFormatter";
 
@@ -48,14 +49,21 @@ export async function appointmentHasCalendarEvent(appointment: Appointment, logg
 
     logger.log("listing calendar events")
 
-    const eventsData = await calendar.events.list({
-        calendarId: 'primary',
-        timeMin: getDateAtMidnight(appointment.date),
-        timeMax: getDateAtMidnight(new Date(appointment.date.getTime() + 1 * 24 * 60 * 60000)), // The following day
-        maxResults: 10,
-        singleEvents: true,
-        orderBy: 'startTime',
-    });
+    let eventsData: GaxiosResponse<calendar_v3.Schema$Events> | undefined;
+
+    try {
+        eventsData = await calendar.events.list({
+            calendarId: 'primary',
+            timeMin: getDateAtMidnight(appointment.date),
+            timeMax: getDateAtMidnight(new Date(appointment.date.getTime() + 1 * 24 * 60 * 60000)), // The following day
+            maxResults: 10,
+            singleEvents: true,
+            orderBy: 'startTime',
+        });
+    } catch(e) {
+        logger.log("listing events failed...")
+        logger.log(e)
+    }
 
     logger.log(JSON.stringify(eventsData));
 

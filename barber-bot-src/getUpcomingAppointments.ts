@@ -34,11 +34,15 @@ export async function getUpcomingAppointments(authCookieKeyValue: string, logger
     root.querySelectorAll("#upcomingBookings ul li")
   );
 
-  appointments.forEach(async appt => {
-    if (!await appointmentHasCalendarEvent(appt, logger)) {
-      await addAppointmentCalendarEvent(appt)
+  for (let i = 0; i < appointments.length; i++) {
+    const appt = appointments[i];
+    
+    const hasCalendarEvent = await appointmentHasCalendarEvent(appt, logger);
+
+    if (!hasCalendarEvent) {
+      await addAppointmentCalendarEvent(appt);
     }
-  });
+  }
 
   return appointments;
 }
