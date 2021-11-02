@@ -95,5 +95,5 @@ export async function appointmentHasCalendarEvent(appointment: Appointment, logg
 }
 
 function getDateAtMidnight(date: Date): string {
-    return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}T:00:00:00Z`
+    return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}T00:00:00Z`
 }
