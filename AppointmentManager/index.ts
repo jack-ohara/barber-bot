@@ -10,7 +10,7 @@ const timerTrigger: AzureFunction = async function (
 
   const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
 
-  const pastAppointments = await getPastAppointments(auth.authCookie);
+  const pastAppointments = await getPastAppointments(auth.authCookie, context);
 
   context.log(JSON.stringify(pastAppointments, null, 2));
   context.log("Exiting barber-bot ✂...");
