@@ -64,7 +64,7 @@ export async function appointmentHasCalendarEvent(appointment: Appointment, logg
         });
     } catch(e) {
         logger.log("listing events failed...")
-        logger.log(e)
+        logger.log(JSON.stringify(e))
     }
 
     logger.log(JSON.stringify(eventsData));
@@ -93,5 +93,5 @@ export async function appointmentHasCalendarEvent(appointment: Appointment, logg
 }
 
 function getDateAtMidnight(date: Date): string {
-    return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDay()}T:00:00:00Z`
+    return `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}T:00:00:00Z`
 }
