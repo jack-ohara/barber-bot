@@ -4,7 +4,7 @@ import { calendar_v3, google } from "googleapis";
 import { Appointment } from "./types";
 import formatDatePretty from "./utils/dateTimeFormatter";
 
-export async function addAppointmentCalendarEvent(appointment: Appointment): Promise<void> {
+export async function addAppointmentCalendarEvent(appointment: Appointment, logger: Context): Promise<void> {
     const oauth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
@@ -14,6 +14,8 @@ export async function addAppointmentCalendarEvent(appointment: Appointment): Pro
     oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+    logger.log("Inserting calendar event...")
 
     await calendar.events.insert({
         sendUpdates: "all",

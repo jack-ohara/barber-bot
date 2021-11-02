@@ -40,7 +40,7 @@ export async function getUpcomingAppointments(authCookieKeyValue: string, logger
     const hasCalendarEvent = await appointmentHasCalendarEvent(appt, logger);
 
     if (!hasCalendarEvent) {
-      await addAppointmentCalendarEvent(appt);
+      await addAppointmentCalendarEvent(appt, logger);
     }
   }
 
