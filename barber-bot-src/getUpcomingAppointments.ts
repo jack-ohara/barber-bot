@@ -34,11 +34,11 @@ export async function getUpcomingAppointments(authCookieKeyValue: string, logger
     root.querySelectorAll("#upcomingBookings ul li")
   );
 
-  await Promise.all(appointments.map(async appt => {
+  appointments.forEach(async appt => {
     if (!await appointmentHasCalendarEvent(appt, logger)) {
       await addAppointmentCalendarEvent(appt)
     }
-  }));
+  });
 
   return appointments;
 }
