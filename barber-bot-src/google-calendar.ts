@@ -54,6 +54,8 @@ export async function appointmentHasCalendarEvent(appointment: Appointment, logg
     let eventsData: GaxiosResponse<calendar_v3.Schema$Events> | undefined;
 
     try {
+        logger.log(`timeMin: ${getDateAtMidnight(appointment.date)}`);
+        logger.log(`timeMax: ${getDateAtMidnight(new Date(appointment.date.getTime() + 1 * 24 * 60 * 60000))}`);
         eventsData = await calendar.events.list({
             calendarId: 'primary',
             timeMin: getDateAtMidnight(appointment.date),
