@@ -102,7 +102,7 @@ const timerTrigger: AzureFunction = async function (
 
   context.log(`Attempting to book appointment: ${JSON.stringify(aptToBook)}`);
 
-  await bookAppointment(auth.authCookie, aptToBook);
+  await bookAppointment(auth.authCookie, aptToBook, context);
 
   context.log(`Booked appointment`);
 };

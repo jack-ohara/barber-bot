@@ -74,7 +74,7 @@ export async function appointmentHasCalendarEvent(appointment: Appointment, logg
             haircutEventDate.getUTCMinutes() === appointment.date.getUTCMinutes() &&
             haircutEventDate.getUTCSeconds() === appointment.date.getUTCSeconds();
 
-        console.log(`Appointment on ${formatDatePretty(appointment.date)} ${appointmentHasEvent ? "already has" : "does not have"} a calendar event`);
+        logger.log(`Appointment on ${formatDatePretty(appointment.date)} ${appointmentHasEvent ? "already has" : "does not have"} a calendar event`);
 
         return appointmentHasEvent;
     }

@@ -20,7 +20,7 @@ export async function getUpcomingAppointments(authCookieKeyValue: string, logger
   );
 
   if (!response.ok) {
-    console.error(response);
+    logger.log(response);
     throw new Error(
       `Failed to get upcoming appointments: ${JSON.stringify(response)}`
     );
