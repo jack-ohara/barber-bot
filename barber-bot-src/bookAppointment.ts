@@ -3,6 +3,7 @@ import fetch from "node-fetch";
 import parse from "node-html-parser";
 import formatAppointment from "./utils/appointmentToString";
 import { Context } from "@azure/functions";
+import { addAppointmentCalendarEvent } from "./google-calendar";
 
 async function getCsrf(authCookie: string): Promise<string> {
   const response = await fetch("https://northwestbarberco.resurva.com/book", {
@@ -56,5 +57,7 @@ export default async function bookAppointment(authCookie: string, appointment: A
     logger.log(`Failed to book apoointment ${formatAppointment(appointment)}`);
   } else {
     logger.log(`Successfully booked appointment ${formatAppointment(appointment)}`);
+
+    await addAppointmentCalendarEvent(appointment, logger);
   }
 }
