@@ -15,7 +15,7 @@ export async function addAppointmentCalendarEvent(appointment: Appointment, logg
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
-    logger.log("Inserting calendar event...")
+    logger.log(`Inserting calendar event for appointment at ${formatDatePretty(appointment.date)}...`);
 
     await calendar.events.insert({
         sendUpdates: "all",
@@ -53,23 +53,14 @@ export async function appointmentHasCalendarEvent(appointment: Appointment, logg
 
     let eventsData: GaxiosResponse<calendar_v3.Schema$Events> | undefined;
 
-    try {
-        logger.log(`timeMin: ${getDateAtMidnight(appointment.date)}`);
-        logger.log(`timeMax: ${getDateAtMidnight(new Date(appointment.date.getTime() + 1 * 24 * 60 * 60000))}`);
-        eventsData = await calendar.events.list({
-            calendarId: 'primary',
-            timeMin: getDateAtMidnight(appointment.date),
-            timeMax: getDateAtMidnight(new Date(appointment.date.getTime() + 1 * 24 * 60 * 60000)), // The following day
-            maxResults: 10,
-            singleEvents: true,
-            orderBy: 'startTime',
-        });
-    } catch(e) {
-        logger.log("listing events failed...")
-        logger.log(JSON.stringify(e))
-    }
-
-    logger.log(JSON.stringify(eventsData));
+    eventsData = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin: getDateAtMidnight(appointment.date),
+        timeMax: getDateAtMidnight(new Date(appointment.date.getTime() + 1 * 24 * 60 * 60000)), // The following day
+        maxResults: 10,
+        singleEvents: true,
+        orderBy: 'startTime',
+    });
 
     const events = eventsData?.data.items;
 
@@ -90,6 +81,8 @@ export async function appointmentHasCalendarEvent(appointment: Appointment, logg
 
         return appointmentHasEvent;
     }
+
+    logger.log(`Appointment on ${formatDatePretty(appointment.date)} does not have a calendar event`);
 
     return false;
 }

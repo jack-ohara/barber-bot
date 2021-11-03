@@ -67,12 +67,6 @@ const timerTrigger: AzureFunction = async function (
 
   const upcomingAppointments = await getUpcomingAppointments(auth.authCookie, context);
 
-  context.log(
-    `${upcomingAppointments.length} upcoming appointment${
-      upcomingAppointments.length != 1 ? "s" : ""
-    } booked`
-  );
-
   const minNumberOfBookedAppointments = Number(
     process.env.MIN_NUMBER_OF_BOOKED_APPOINTMENTS
   );

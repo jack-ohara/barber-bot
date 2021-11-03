@@ -34,6 +34,12 @@ export async function getUpcomingAppointments(authCookieKeyValue: string, logger
     root.querySelectorAll("#upcomingBookings ul li")
   );
 
+  logger.log(
+    `${appointments.length} upcoming appointment${
+      appointments.length != 1 ? "s" : ""
+    } booked`
+  );
+
   for (let i = 0; i < appointments.length; i++) {
     const appt = appointments[i];
     
