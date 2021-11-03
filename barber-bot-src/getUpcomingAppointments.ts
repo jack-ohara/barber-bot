@@ -1,8 +1,10 @@
+import { Context } from "@azure/functions";
 import fetch from "node-fetch";
 import { parse } from "node-html-parser";
+import { addAppointmentCalendarEvent, appointmentHasCalendarEvent } from "./google-calendar";
 import parseAppointments from "./utils/existingBookingsParser";
 
-export async function getUpcomingAppointments(authCookieKeyValue: string) {
+export async function getUpcomingAppointments(authCookieKeyValue: string, logger: Context) {
   const response = await fetch(
     "https://northwestbarberco.resurva.com/appointments",
     {
@@ -18,7 +20,7 @@ export async function getUpcomingAppointments(authCookieKeyValue: string) {
   );
 
   if (!response.ok) {
-    console.error(response);
+    logger.log(response);
     throw new Error(
       `Failed to get upcoming appointments: ${JSON.stringify(response)}`
     );
@@ -31,6 +33,22 @@ export async function getUpcomingAppointments(authCookieKeyValue: string) {
   const appointments = parseAppointments(
     root.querySelectorAll("#upcomingBookings ul li")
   );
+
+  logger.log(
+    `${appointments.length} upcoming appointment${
+      appointments.length != 1 ? "s" : ""
+    } booked`
+  );
+
+  for (let i = 0; i < appointments.length; i++) {
+    const appt = appointments[i];
+    
+    const hasCalendarEvent = await appointmentHasCalendarEvent(appt, logger);
+
+    if (!hasCalendarEvent) {
+      await addAppointmentCalendarEvent(appt, logger);
+    }
+  }
 
   return appointments;
 }

@@ -65,13 +65,7 @@ const timerTrigger: AzureFunction = async function (
 
   const auth = await login(process.env.EMAIL_ADDRESS, process.env.PASSWORD);
 
-  const upcomingAppointments = await getUpcomingAppointments(auth.authCookie);
-
-  context.log(
-    `${upcomingAppointments.length} upcoming appointment${
-      upcomingAppointments.length != 1 ? "s" : ""
-    } booked`
-  );
+  const upcomingAppointments = await getUpcomingAppointments(auth.authCookie, context);
 
   const minNumberOfBookedAppointments = Number(
     process.env.MIN_NUMBER_OF_BOOKED_APPOINTMENTS
@@ -102,7 +96,7 @@ const timerTrigger: AzureFunction = async function (
 
   context.log(`Attempting to book appointment: ${JSON.stringify(aptToBook)}`);
 
-  await bookAppointment(auth.authCookie, aptToBook);
+  await bookAppointment(auth.authCookie, aptToBook, context);
 
   context.log(`Booked appointment`);
 };

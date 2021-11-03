@@ -1,8 +1,9 @@
+import { Context } from "@azure/functions";
 import fetch from "node-fetch";
 import { parse } from "node-html-parser";
 import parseAppointments from "./utils/existingBookingsParser";
 
-export async function getPastAppointments(authCookieKeyValue: string) {
+export async function getPastAppointments(authCookieKeyValue: string, logger: Context) {
   const response = await fetch(
     "https://northwestbarberco.resurva.com/appointments",
     {
@@ -18,7 +19,7 @@ export async function getPastAppointments(authCookieKeyValue: string) {
   );
 
   if (!response.ok) {
-    console.error(response);
+    logger.log(response);
     throw new Error(
       `Failed to get past appointments: ${JSON.stringify(response)}`
     );

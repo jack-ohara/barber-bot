@@ -2,6 +2,7 @@ import { Appointment } from "./types";
 import fetch from "node-fetch";
 import parse from "node-html-parser";
 import formatAppointment from "./utils/appointmentToString";
+import { Context } from "@azure/functions";
 
 async function getCsrf(authCookie: string): Promise<string> {
   const response = await fetch("https://northwestbarberco.resurva.com/book", {
@@ -18,7 +19,7 @@ async function getCsrf(authCookie: string): Promise<string> {
   return root.querySelector('#csrf').attributes["value"];
 }
 
-export default async function bookAppointment(authCookie: string, appointment: Appointment) {
+export default async function bookAppointment(authCookie: string, appointment: Appointment, logger: Context) {
   const csrf = await getCsrf(authCookie);
 
   const formBody = new URLSearchParams();
@@ -52,8 +53,8 @@ export default async function bookAppointment(authCookie: string, appointment: A
   const requestFailed = Boolean(root.querySelector(".booking-errors-feedback"));
   
   if(requestFailed) {
-    console.error(`Failed to book apoointment ${formatAppointment(appointment)}`);
+    logger.log(`Failed to book apoointment ${formatAppointment(appointment)}`);
   } else {
-    console.log(`Successfully booked appointment ${formatAppointment(appointment)}`);
+    logger.log(`Successfully booked appointment ${formatAppointment(appointment)}`);
   }
 }
