@@ -2,12 +2,14 @@ import { AzureFunction, Context } from "@azure/functions";
 import bookAppointment from "../barber-bot-src/bookAppointment";
 import getAvailableAppointments from "../barber-bot-src/getAvailableAppointments";
 import { getUpcomingAppointments } from "../barber-bot-src/getUpcomingAppointments";
+import { RemoveAppointmentsWithConflictingEvents } from "../barber-bot-src/google-calendar";
 import login from "../barber-bot-src/login";
 import { Appointment } from "../barber-bot-src/types";
 
 async function getAppointments(
   dates: Date[],
-  authCookie: string
+  authCookie: string,
+  logger: Context
 ): Promise<Appointment[]> {
   const requests = dates.map((d) => getAvailableAppointments(authCookie, d));
 
@@ -23,7 +25,9 @@ async function getAppointments(
     (a, b) => a.date.getTime() - b.date.getTime()
   );
 
-  return allAppointments;
+  const appointmentsWhenIAmNotBusy = RemoveAppointmentsWithConflictingEvents(allAppointments, logger);
+
+  return appointmentsWhenIAmNotBusy;
 }
 
 function getPossibleDatesForNextAppointment(
@@ -39,7 +43,8 @@ function getPossibleDatesForNextAppointment(
 
 async function getAvailabilityForNextAppointment(
   authCookie: string,
-  appointments: Appointment[]
+  appointments: Appointment[],
+  logger: Context
 ): Promise<Appointment[]> {
   const latestBookedAppointment = appointments.find(
     (app) =>
@@ -54,7 +59,7 @@ async function getAvailabilityForNextAppointment(
     latestBookedAppointment
   );
 
-  return await getAppointments(possibleDates, authCookie);
+  return await getAppointments(possibleDates, authCookie, logger);
 }
 
 const timerTrigger: AzureFunction = async function (
@@ -78,7 +83,8 @@ const timerTrigger: AzureFunction = async function (
 
   const nextAppointmentAvailability = await getAvailabilityForNextAppointment(
     auth.authCookie,
-    upcomingAppointments
+    upcomingAppointments,
+    context
   );
 
   if (nextAppointmentAvailability.length === 0) {
