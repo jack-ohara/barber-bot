@@ -14,6 +14,8 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
     const { tokens } = await oauth2Client.getToken(code);
 
+    context.log(JSON.stringify(tokens))
+
     // TODO
     // Make this endpoint store the refresh token in KeyVault
 
