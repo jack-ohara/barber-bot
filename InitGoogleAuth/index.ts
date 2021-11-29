@@ -19,7 +19,7 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
     const url = oauth2Client.generateAuthUrl({
         access_type: "offline",
         scope: scopes,
-        state: state
+        // state: state
     });
 
     context.res = {
