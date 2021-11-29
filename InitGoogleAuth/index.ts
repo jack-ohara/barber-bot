@@ -14,15 +14,12 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
     const scopes = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events'];
 
-    const state = { code: process.env.OAUTHCALLBACK_CODE };
-    const encodedState = Buffer.from(unescape(encodeURIComponent(JSON.stringify(state)))).toString('base64');
-
-    context.log(encodedState);
+    const state = JSON.stringify({ code: process.env.OAUTHCALLBACK_CODE });
 
     const url = oauth2Client.generateAuthUrl({
         access_type: "offline",
         scope: scopes,
-        state: encodedState
+        state: state
     });
 
     context.res = {
