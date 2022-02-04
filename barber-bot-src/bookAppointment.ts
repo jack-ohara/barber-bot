@@ -52,12 +52,18 @@ export default async function bookAppointment(authCookie: string, appointment: A
   const root = parse(await response.text());
 
   const requestFailed = Boolean(root.querySelector(".booking-errors-feedback"));
-  
-  if(requestFailed) {
+
+  if (requestFailed) {
     logger.log(`Failed to book apoointment ${formatAppointment(appointment)}`);
   } else {
     logger.log(`Successfully booked appointment ${formatAppointment(appointment)}`);
 
-    await addAppointmentCalendarEvent(appointment, logger);
+    try {
+      await addAppointmentCalendarEvent(appointment, logger);
+    } catch (e) {
+      console.log("Failed to add appointment to calendar");
+
+      console.error(e);
+    }
   }
 }

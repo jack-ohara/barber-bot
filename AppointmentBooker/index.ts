@@ -25,9 +25,17 @@ async function getAppointments(
     (a, b) => a.date.getTime() - b.date.getTime()
   );
 
-  const appointmentsWhenIAmNotBusy = RemoveAppointmentsWithConflictingEvents(allAppointments, logger);
+  try {
 
-  return appointmentsWhenIAmNotBusy;
+    const appointmentsWhenIAmNotBusy = RemoveAppointmentsWithConflictingEvents(allAppointments, logger);
+
+    return appointmentsWhenIAmNotBusy;
+  } catch (e) {
+    console.log("Failed to retrieve calendar");
+    console.error(e);
+
+    return allAppointments;
+  }
 }
 
 function getPossibleDatesForNextAppointment(
