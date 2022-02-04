@@ -35,18 +35,22 @@ export async function getUpcomingAppointments(authCookieKeyValue: string, logger
   );
 
   logger.log(
-    `${appointments.length} upcoming appointment${
-      appointments.length != 1 ? "s" : ""
+    `${appointments.length} upcoming appointment${appointments.length != 1 ? "s" : ""
     } booked`
   );
 
   for (let i = 0; i < appointments.length; i++) {
     const appt = appointments[i];
-    
-    const hasCalendarEvent = await appointmentHasCalendarEvent(appt, logger);
 
-    if (!hasCalendarEvent) {
-      await addAppointmentCalendarEvent(appt, logger);
+    try {
+      const hasCalendarEvent = await appointmentHasCalendarEvent(appt, logger);
+
+      if (!hasCalendarEvent) {
+        await addAppointmentCalendarEvent(appt, logger);
+      }
+    } catch (e) {
+      console.log("Failed attempting to add calendar event for pre-existing appointments");
+      console.error(e);
     }
   }
 
