@@ -1,5 +1,7 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { stat } from "fs";
 import { google } from "googleapis";
+import { buffer } from "stream/consumers";
 
 const httpTrigger: AzureFunction = async function (context: Context, req: HttpRequest): Promise<void> {
     context.log('HTTP trigger function processed a request.');
@@ -12,9 +14,18 @@ const httpTrigger: AzureFunction = async function (context: Context, req: HttpRe
 
     const scopes = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events'];
 
-    const url = oauth2Client.generateAuthUrl({ access_type: "offline", scope: scopes });
+    const state = JSON.stringify({ code: process.env.OAUTHCALLBACK_CODE });
+
+    const url = oauth2Client.generateAuthUrl({
+        access_type: "offline",
+        scope: scopes,
+        // state: state
+    });
 
     context.res = {
+        headers: {
+            'Content-type': 'text/html'
+        },
         body: `
             <!DOCTYPE html>
             <html lang="en">
