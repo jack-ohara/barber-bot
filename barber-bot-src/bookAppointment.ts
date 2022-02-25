@@ -58,12 +58,12 @@ export default async function bookAppointment(authCookie: string, appointment: A
   } else {
     logger.log(`Successfully booked appointment ${formatAppointment(appointment)}`);
 
-    try {
-      await addAppointmentCalendarEvent(appointment, logger);
-    } catch (e) {
-      console.log("Failed to add appointment to calendar");
+    // try {
+    //   await addAppointmentCalendarEvent(appointment, logger);
+    // } catch (e) {
+    //   console.log("Failed to add appointment to calendar");
 
-      console.error(e);
-    }
+    //   console.error(e);
+    // }
   }
 }
