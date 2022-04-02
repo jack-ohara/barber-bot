@@ -71,6 +71,24 @@ async function getAvailabilityForNextAppointment(
   return await getAppointments(possibleDates, authCookie, logger);
 }
 
+function getAppointmentToBook(possibleAppointments: Appointment[]): Appointment {
+  possibleAppointments.sort((apt1, apt2) => apt1.date < apt2.date ? -1 : 1)
+
+  const earliestDayDate = possibleAppointments[0].date.getUTCDate()
+  const earliestDayMonth = possibleAppointments[0].date.getUTCMonth()
+  const earliestDayYear = possibleAppointments[0].date.getUTCFullYear()
+
+  const allAppointmentsOnEarliestDay = possibleAppointments.filter(apt =>
+    apt.date.getUTCDate() === earliestDayDate &&
+    apt.date.getUTCMonth() === earliestDayMonth &&
+    apt.date.getUTCFullYear() === earliestDayYear
+  )
+
+  const bestApt = allAppointmentsOnEarliestDay.find(apt => apt.date.getHours() >= 11)
+
+  return bestApt ? bestApt : possibleAppointments[0]
+}
+
 const timerTrigger: AzureFunction = async function (
   context: Context,
   myTimer: any
@@ -107,7 +125,7 @@ const timerTrigger: AzureFunction = async function (
     )}`
   );
 
-  const aptToBook = nextAppointmentAvailability[0];
+  const aptToBook = getAppointmentToBook(nextAppointmentAvailability);
 
   context.log(`Attempting to book appointment: ${JSON.stringify(aptToBook)}`);
 
